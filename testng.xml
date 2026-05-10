@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<!--
+    Notes App – Full Regression Suite
+    ───────────────────────────────────
+    Run:   mvn test
+    Report: mvn allure:report  (opens target/site/allure-maven-plugin/index.html)
+
+    Tests are intentionally sequential (thread-count="1") because each test
+    class spins up its own Appium driver.  To run in parallel, increase
+    thread-count and ensure a separate device/emulator is available per thread.
+-->
+<suite name="NotesAppTestSuite" verbose="1" thread-count="1">
+
+    <!-- ── Mandatory Scenarios ──────────────────────────────────────────── -->
+    <test name="Scenario 1 – Create Text Note">
+        <classes>
+            <class name="com.medianet.tests.TestCreateNote"/>
+        </classes>
+    </test>
+
+    <test name="Scenario 2 – Create Todo List">
+        <classes>
+            <class name="com.medianet.tests.TestCreateTodo"/>
+        </classes>
+    </test>
+
+    <test name="Scenario 3 – Mark Todo Items Completed">
+        <classes>
+            <class name="com.medianet.tests.TestMarkTodoCompleted"/>
+        </classes>
+    </test>
+
+    <test name="Scenario 4 – Edit and Delete">
+        <classes>
+            <class name="com.medianet.tests.TestEditDelete"/>
+        </classes>
+    </test>
+
+    <test name="Scenario 5 – Input Validations">
+        <classes>
+            <class name="com.medianet.tests.TestValidations"/>
+        </classes>
+    </test>
+
+    <!-- ── Additional Scenarios ─────────────────────────────────────────── -->
+    <test name="Scenario 6-9 – Additional">
+        <classes>
+            <class name="com.medianet.tests.TestAdditional"/>
+        </classes>
+    </test>
+
+</suite>
