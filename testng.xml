@@ -1,0 +1,14 @@
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd"&gt;
+&lt;suite name="NotesAppTestSuite" verbose="1"&gt;
+    &lt;test name="NotesAppTests"&gt;
+        &lt;classes&gt;
+            &lt;class name="com.medianet.tests.TestCreateNote"/&gt;
+            &lt;class name="com.medianet.tests.TestCreateTodo"/&gt;
+            &lt;class name="com.medianet.tests.TestMarkTodoCompleted"/&gt;
+            &lt;class name="com.medianet.tests.TestEditDelete"/&gt;
+            &lt;class name="com.medianet.tests.TestValidations"/&gt;
+            &lt;class name="com.medianet.tests.TestAdditional"/&gt;
+        &lt;/classes&gt;
+    &lt;/test&gt;
+&lt;/suite&gt;
