@@ -10,6 +10,8 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.util.Collections;
+
 import java.time.Duration;
 import java.util.List;
 
@@ -83,6 +85,12 @@ public abstract class BasePage {
     }
 
     protected WebElement findByIndex(By locator, int index) {
+        // Wait until enough elements are present (handles async RecyclerView binding)
+        try {
+            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(locator, index));
+        } catch (Exception ignored) {
+            // List might be empty — throw informative error below
+        }
         List<WebElement> elements = findAll(locator);
         if (index >= elements.size()) {
             throw new IndexOutOfBoundsException(

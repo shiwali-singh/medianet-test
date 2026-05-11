@@ -6,9 +6,9 @@ import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.interactions.PointerInput;
 import org.openqa.selenium.interactions.Sequence;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -72,26 +72,28 @@ public class HomePage extends BasePage {
     }
 
     /**
-     * Deletes a note by swiping its card from right to left.
+     * Deletes a note card by swiping it.
      * The RecyclerView uses a swipe-to-delete ItemTouchHelper.
      */
-    @Step("Delete note '{title}' by swiping left")
+    @Step("Delete note '{title}' by swiping")
     public void deleteNoteBySwipe(String title) {
         By locator = By.xpath(
             "//*[@resource-id='" + AppLocators.HOME_NOTE_NAME + "' and @text='" + title + "']");
         WebElement card = waitForVisible(locator);
 
-        int startX = card.getLocation().getX() + card.getSize().getWidth() - 10;
-        int startY = card.getLocation().getY() + card.getSize().getHeight() / 2;
-        int endX   = card.getLocation().getX() + 10;
+        int screenWidth = driver.manage().window().getSize().getWidth();
+        int y      = card.getLocation().getY() + card.getSize().getHeight() / 2;
+        int startX = (int) (screenWidth * 0.85);
+        int endX   = (int) (screenWidth * 0.05);
 
         PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
-        Sequence swipe = new Sequence(finger, 1);
+        Sequence swipe = new Sequence(finger, 0);
         swipe.addAction(finger.createPointerMove(Duration.ZERO,
-                PointerInput.Origin.viewport(), startX, startY));
+                PointerInput.Origin.viewport(), startX, y));
         swipe.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
-        swipe.addAction(finger.createPointerMove(Duration.ofMillis(500),
-                PointerInput.Origin.viewport(), endX, startY));
+        swipe.addAction(new org.openqa.selenium.interactions.Pause(finger, Duration.ofMillis(150)));
+        swipe.addAction(finger.createPointerMove(Duration.ofMillis(600),
+                PointerInput.Origin.viewport(), endX, y));
         swipe.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
         driver.perform(Collections.singletonList(swipe));
     }
@@ -100,14 +102,30 @@ public class HomePage extends BasePage {
 
     @Step("Check if note with title '{title}' is visible in the list")
     public boolean isNoteDisplayed(String title) {
+        if (title == null || title.isEmpty()) return false;
         By locator = By.xpath(
             "//*[@resource-id='" + AppLocators.HOME_NOTE_NAME + "' and @text='" + title + "']");
-        return isPresent(locator);
+        try {
+            // Use a 5-second wait — long enough for post-navigation list render,
+            // short enough that negative assertions don't drag on for 15 seconds.
+            new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(5))
+                .until(ExpectedConditions.presenceOfElementLocated(locator));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Step("Get total note card count")
     public int getNoteCount() {
-        return findAll(By.id(AppLocators.HOME_NOTE_NAME)).size();
+        By locator = By.id(AppLocators.HOME_NOTE_NAME);
+        // Brief wait for list to render after navigation
+        try {
+            wait.until(d -> !d.findElements(locator).isEmpty());
+        } catch (Exception ignored) {
+            // Home list may be genuinely empty
+        }
+        return findAll(locator).size();
     }
 
     @Step("Check if note list is empty (no cards shown)")

@@ -92,18 +92,21 @@ public class TodoPage extends BasePage {
      */
     @Step("Swipe-delete item at index {index}")
     public void deleteItemBySwipe(int index) {
-        WebElement item = findByIndex(By.id(AppLocators.TODO_ITEM_TEXT), index);
+        WebElement item = findByIndex(By.id(AppLocators.TODO_ITEM_CHECKBOX), index);
 
-        int startX = item.getLocation().getX() + item.getSize().getWidth() - 10;
+        int screenWidth = driver.manage().window().getSize().getWidth();
+        // Try right-to-left first (matching home-screen swipe direction)
+        int startX = (int) (screenWidth * 0.85);
+        int endX   = (int) (screenWidth * 0.05);
         int startY = item.getLocation().getY() + item.getSize().getHeight() / 2;
-        int endX   = item.getLocation().getX() + 10;
 
         PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
         Sequence swipe = new Sequence(finger, 1);
         swipe.addAction(finger.createPointerMove(Duration.ZERO,
                 PointerInput.Origin.viewport(), startX, startY));
         swipe.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
-        swipe.addAction(finger.createPointerMove(Duration.ofMillis(500),
+        // Slow, deliberate swipe to ensure ItemTouchHelper velocity threshold is met
+        swipe.addAction(finger.createPointerMove(Duration.ofMillis(800),
                 PointerInput.Origin.viewport(), endX, startY));
         swipe.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
         driver.perform(Collections.singletonList(swipe));
@@ -140,7 +143,14 @@ public class TodoPage extends BasePage {
 
     @Step("Get total number of checklist items")
     public int getItemCount() {
-        return findAll(By.id(AppLocators.TODO_ITEM_TEXT)).size();
+        By locator = By.id(AppLocators.TODO_ITEM_TEXT);
+        // Wait briefly for the RecyclerView to bind items after navigation
+        try {
+            wait.until(d -> !d.findElements(locator).isEmpty());
+        } catch (Exception ignored) {
+            // Genuinely empty list is OK
+        }
+        return findAll(locator).size();
     }
 
     @Step("Get number of checked items")

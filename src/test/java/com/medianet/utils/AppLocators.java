@@ -12,7 +12,7 @@ package com.medianet.utils;
  */
 public final class AppLocators {
 
-    private static final String PKG = AppConfig.getAppPackage(); // com.example.myapp
+    private static final String PKG = "com.example.myapp";
 
     private AppLocators() {}
 

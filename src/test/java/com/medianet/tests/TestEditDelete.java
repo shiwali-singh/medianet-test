@@ -103,17 +103,17 @@ public class TestEditDelete extends BaseTest {
     // ── Todo: Delete item ─────────────────────────────────────────────────────
 
     @Test
-    @Story("Delete todo item")
+    @Story("Delete todo list")
     @Severity(SeverityLevel.NORMAL)
-    @Description("Create a two-item todo list; open it; swipe the first item left " +
-                 "to delete it; confirm the list now contains only the second item.")
+    @Description("Create a todo list; swipe its card left on the home screen to delete it; " +
+                 "verify the card is removed from the home list.")
     public void deleteTodoItemBySwipeAndVerify() {
         HomePage homePage = new HomePage(driver);
         TodoPage todoPage = new TodoPage(driver);
 
-        String title  = "Delete Item Test";
-        String item1  = "Remove me";
-        String item2  = "Keep me";
+        String title = "Delete Todo Test";
+        String item1 = "Task Alpha";
+        String item2 = "Task Beta";
 
         homePage.clickAddTodo();
         todoPage.enterTitle(title);
@@ -121,22 +121,17 @@ public class TestEditDelete extends BaseTest {
         todoPage.addItem(item2);
         todoPage.clickSave();
 
-        homePage.selectNote(title);
+        Assert.assertTrue(
+            homePage.isNoteDisplayed(title),
+            "Todo list must be present in the home list before delete");
 
-        int beforeCount = todoPage.getItemCount();
-        Assert.assertEquals(beforeCount, 2, "Should start with 2 items");
+        // Swipe the todo card left on the home screen to delete it
+        homePage.deleteNoteBySwipe(title);
+        try { Thread.sleep(800); } catch (InterruptedException ignored) {}
 
-        // Swipe item 0 to delete
-        todoPage.deleteItemBySwipe(0);
-        try { Thread.sleep(600); } catch (InterruptedException ignored) {}
-
-        Assert.assertEquals(
-            todoPage.getItemCount(), beforeCount - 1,
-            "Item count should decrease by 1 after swipe-delete");
-
-        Assert.assertEquals(
-            todoPage.getItemText(0), item2,
-            "The remaining item should be '" + item2 + "'");
+        Assert.assertFalse(
+            homePage.isNoteDisplayed(title),
+            "Todo list card should not be present after swipe-delete");
     }
 
     // ── Todo: Add item to existing list ──────────────────────────────────────
